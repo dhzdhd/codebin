@@ -9,7 +9,12 @@ const config: UserConfig = {
 			compiler: 'svelte',
 			autoInstall: true
 		})
-	]
+	],
+	server: {
+		fs: {
+			allow: ['./api', '..']
+		}
+	}
 };
 
 export default config;

@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { crossfade, fly, scale, slide } from "svelte/transition";
+	import { crossfade, fly, scale, slide } from 'svelte/transition';
 
-    let expand: boolean = false;
+	let expand: boolean = false;
 
-    const setExpand = () => expand = !expand;
+	const setExpand = () => (expand = !expand);
 </script>
 
 <header>
