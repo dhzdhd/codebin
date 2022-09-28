@@ -1,12 +1,14 @@
 <div>
-    <textarea name="" id=""></textarea>
+	<textarea name="" id="" />
 </div>
 
 <style lang="sass">
+    @use '../styles/variables' as colors
+
     div
-        height: 99vh
+        height: 100%
         margin-left: 8rem
-        padding: 1rem 1rem
+        padding: 0 0
 
         textarea
             height: 100%
@@ -18,9 +20,10 @@
             border-color: transparent
             border-radius: 0.5rem
             font-size: 2rem
+            margin-top: 1rem
             padding: 1rem
             outline: none
 
-            &:hover, &:focus
-                border-color: #00288a
+            &:hover, &:focus, &:active
+                border-color: colors.$dark-primary
 </style>

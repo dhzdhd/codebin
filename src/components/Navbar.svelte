@@ -1,33 +1,20 @@
+<script lang="ts">
+</script>
+
 <nav>
-    <ul>
-        <li>
-            T
-        </li>
-        <li>
-            T
-        </li>
-        <li>
-            T
-        </li>
-        <li>
-            T
-        </li>
-        <li>
-            T
-        </li>
-        <li>
-            T
-        </li>
-    </ul>
+	<ul>
+		<li><iconify-icon icon="fluent:copy-24-regular" /></li>
+		<li><iconify-icon icon="fluent:code-24-regular" /></li>
+	</ul>
 </nav>
 
 <style lang="sass">
     nav
-        position: absolute
+        position: fixed
         top: 50%
         transform: translate(0, -50%)
         width: 4rem
-        margin-left: 1.5rem
+        // margin-left: 1.5rem
         background-color: white
         border-radius: 2rem
         box-shadow: 10px 10px 1rem 1px #e3eef6
@@ -47,6 +34,7 @@
                 aspect-ratio: 1
                 width: 3rem
                 border-radius: 100%
+                font-size: 2rem
 
                 &:hover
                     background-color: #00288a

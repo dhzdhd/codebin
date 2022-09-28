@@ -1,21 +1,28 @@
 <script lang="ts">
-    import Header from "../components/Header.svelte";
-	import Navbar from "../components/Navbar.svelte";
-    import '../styles.sass'
-	import Page from "./+page.svelte";
+	import Header from '../components/Header.svelte';
+	import Navbar from '../components/Navbar.svelte';
+	import '../styles/main.sass';
 </script>
 
 <Header />
 <Navbar />
-<main><slot></slot></main>
+<main>
+	<slot />
+</main>
 
 <style lang="sass">
     @use 'sass:color'
-    @use '../styles'
 
     :root
-        max-height: 100vh
-        max-width: 100vw
-
         background-color: #ecf7ff
+
+    :global(div)
+        height: 100vh
+        display: flex
+        flex-direction: column
+        padding: 1rem
+
+    main
+        width: 100%
+        height: 100%
 </style>
