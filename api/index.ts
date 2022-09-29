@@ -2,6 +2,11 @@ import express from 'express';
 import cors = require('cors');
 import { initializeApp } from 'firebase/app';
 import { getDatabase, set, ref } from 'firebase/database';
+import dotenv from 'dotenv';
+import uniqid from 'uniqid';
+import bodyParser from 'body-parser';
+
+dotenv.config({ path: '.env' });
 
 const firebaseConfig = {
 	apiKey: process.env.API_KEY,
@@ -14,45 +19,60 @@ const firebaseConfig = {
 	measurementId: process.env.MEASUREMENT_ID
 };
 
+console.log(JSON.stringify(firebaseConfig));
+
 const fbApp = initializeApp(firebaseConfig);
 const database = getDatabase(fbApp);
 
 const app = express();
+
 const PORT = process.env.PORT ?? 5000;
 
-const allowedOrigins = ['http://localhost:5173', 'https://codebin-dun.vercel.app/'];
+const serverUrl = process.env.SERVER_URL ?? 'http://localhost:5173'
+const allowedOrigins = [serverUrl];
 const options = {
 	origin: allowedOrigins
 };
 
+const checkId = (id: string): boolean => {
+	return id.length == 10 ? true : false;
+};
+
 app.use(cors(options));
+app.use(bodyParser.json())
 
 app.get('/api', async (req, res) => {
 	res.type('text');
 
-  res.send('Paste API')
-});
-
-app.get('/api/pastes', async (req, res) => {
-	res.type('json');
+	res.send('Paste API');
 });
 
 app
-	.route('/api/pastes/:id')
+	.route('/api/pastes')
 	.post(async (req, res) => {
-    res.type('json');
-		const id = req.params['id'];
 
-		set(ref(database, 'pastes/' + id), {
-			content: req.body
+
+		res.type('json');
+
+		const id = uniqid('pastes/');
+		console.log(JSON.stringify(req.body));
+
+		set(ref(database, id), {
+			id: id,
+			content: req.body.content,
+			language: req.body.language,
 		});
 
 		res.json({
-			id: id
+			id: id.substring(7),
+			url: `${serverUrl}/api/${id}`
 		});
-	})
+	});
+
+app
+	.route('/api/pastes/:id')
 	.get(async (req, res) => {
-    res.type('json');
+		res.type('json');
 		const id = req.params['id'];
 
 		res.json({
