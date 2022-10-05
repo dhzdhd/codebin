@@ -1,72 +1,87 @@
 import express from 'express';
 import cors = require('cors');
-import { initializeApp } from 'firebase/app';
-import { getDatabase, set, ref } from 'firebase/database';
 import dotenv from 'dotenv';
 import uniqid from 'uniqid';
 import bodyParser from 'body-parser';
+import mongoose, { Schema } from 'mongoose';
 
 dotenv.config({ path: '.env' });
 
-const firebaseConfig = {
-	apiKey: process.env.API_KEY,
-	authDomain: process.env.AUTH_DOMAIN,
-	databaseURL: process.env.DATABASE_URL,
-	projectId: process.env.PROJECT_ID,
-	storageBucket: process.env.STORAGE_BUCKET,
-	messagingSenderId: process.env.MESSAGING_SENDER_ID,
-	appId: process.env.APP_ID,
-	measurementId: process.env.MEASUREMENT_ID
-};
-
-console.log(JSON.stringify(firebaseConfig));
-
-const fbApp = initializeApp(firebaseConfig);
-const database = getDatabase(fbApp);
-
 const app = express();
+
+const init = async () => await mongoose.connect(process.env.MONGO_URI as string);
+init();
 
 const PORT = process.env.PORT ?? 5000;
 
-const serverUrl = process.env.SERVER_URL ?? 'http://localhost:5173'
+const serverUrl = process.env.SERVER_URL ?? 'http://localhost:5173';
 const allowedOrigins = [serverUrl];
 const options = {
 	origin: allowedOrigins
 };
 
-const checkId = (id: string): boolean => {
-	return id.length == 10 ? true : false;
-};
+interface IPaste {
+	id: string;
+	content: string;
+	language: string;
+	date: Date;
+}
+
+const PasteSchema = new Schema<IPaste>({
+	id: { type: String },
+	content: { type: String },
+	language: { type: String },
+	date: { type: Date }
+});
+const PasteModel = mongoose.model<IPaste>('pastes', PasteSchema);
 
 app.use(cors(options));
-app.use(bodyParser.json())
+app.use(bodyParser.json());
 
 app.get('/api', async (req, res) => {
 	res.type('text');
 
-	res.send('Paste API');
+	res.send('e');
 });
 
 app
 	.route('/api/pastes')
 	.post(async (req, res) => {
-
-
 		res.type('json');
 
-		const id = uniqid('pastes/');
+		const id = uniqid();
 		console.log(JSON.stringify(req.body));
 
-		set(ref(database, id), {
+		const paste = new PasteModel({
 			id: id,
 			content: req.body.content,
 			language: req.body.language,
+			date: Date.now()
 		});
 
-		res.json({
-			id: id.substring(7),
-			url: `${serverUrl}/api/${id}`
-		});
+		try {
+			await paste.save();
+
+			res.json({
+				id: id.substring(7),
+				url: `${serverUrl}/api/${id}`
+			});
+		} catch (err) {
+			res.status(500).json({
+				message: 'Error in saving data!'
+			});
+		}
+	})
+	.get(async (req, res) => {
+		res.type('json');
+
+		try {
+			res.send(await PasteModel.find({}));
+		} catch (err) {
+			res.status(500).send({
+				message: 'Error in fetching data!'
+			});
+		}
 	});
 
 app
@@ -75,8 +90,23 @@ app
 		res.type('json');
 		const id = req.params['id'];
 
+		const data = PasteModel.find({ id: id });
+		console.log(JSON.stringify(data.get('content')));
+
+		res.status(200);
 		res.json({
 			id: id
+		});
+	})
+	.delete(async (req, res) => {
+		res.type('json');
+		const id = req.params['id'];
+
+		console.log(id);
+		PasteModel.remove({ id: id });
+
+		res.json({
+			message: 'Successfully deleted post'
 		});
 	});
 
