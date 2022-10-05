@@ -41,7 +41,7 @@ app.use(bodyParser.json());
 app.get('/api', async (req, res) => {
 	res.type('text');
 
-	res.send('e');
+	res.send('CodeBin API');
 });
 
 app
@@ -90,28 +90,38 @@ app
 		res.type('json');
 		const id = req.params['id'];
 
-		const data = PasteModel.find({ id: id });
-		console.log(JSON.stringify(data.get('content')));
+		try {
+			const data = await PasteModel.findOne({ id: id });
+			if (data === null) {
+				throw 'Data not found';
+			}
 
-		res.status(200);
-		res.json({
-			id: id
-		});
+			res.json({ ...data?.toJSON(), url: `${serverUrl}/api/${id}` });
+		} catch (err) {
+			res.status(500).json({ message: 'Error in fetching data!' });
+		}
 	})
 	.delete(async (req, res) => {
 		res.type('json');
 		const id = req.params['id'];
 
 		console.log(id);
-		PasteModel.remove({ id: id });
 
-		res.json({
-			message: 'Successfully deleted post'
-		});
+		try {
+			await PasteModel.deleteOne({ id: id });
+
+			res.json({
+				message: 'Successfully deleted paste!'
+			});
+		} catch (err) {
+			res.status(500).json({
+				message: 'Error in deleting data!'
+			});
+		}
 	});
 
 app.listen(PORT, () => {
 	console.log('Listening on http://localhost:5000/');
 });
 
-module.exports = app;
+export { app };
